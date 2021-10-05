@@ -1,0 +1,201 @@
+---
+title: "Funciones"
+author: "Melina Schamberger"
+date: "29/9/2021"
+output: rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rmdformats)
+```
+
+## Funciones
+
+Las funciones están presentes en los distintos lenguajes de programación, aunque pueden existir variaciones en la sintaxis de su elaboración. 
+
+En el caso de R, podemos pensar un ejemplo concreto: la funcion __sum (x)__. Al asignar el argumento x, la función realiza el cálculo. 
+```{r}
+x <- c(10, 8, 9)
+
+sum (x)
+```
+Además, podemos asignar la función a un objeto para almacenar su resultado. En el ejemplo reciente, asignaríamos la suma al objeto Cálculo. 
+```{r}
+Calculo <- sum (x)
+```
+
+Veamos los elementos de una función: 
+
+IMAGEN
+
+A partir de la imagen, podemos observar que entre las llaves se define la función; mientras que, entre paréntesis, se especifica el argumento (o índice). En este caso, la función comprende dos sumas del objeto x, por lo que al correrla veremos que realiza el cálculo sin necesidad de especificar más que su argumento. 
+```{r}
+Ejemplo <- function(x, y){
+  (sum (x) + sum (y))
+}
+
+Ejemplo (10, 4)
+
+#Se pueden imputar los argumentos
+Ejemplo(x = 4, y = 10)
+```
+
+En el ejemplo anterior vimos que el return no es parte necesaria de una función. Sin embargo, también es posible realizar una salida con __return()__. 
+```{r}
+Formula_notas <- function(a, b ,c) { #definimos nombre de la funcion y argumentos
+   resultado <- a * b + c #cuerpo
+    return(resultado) # intercambiable por print()
+}
+
+Formula_notas(5,10,4)
+
+```
+Se pueden setear valores por default para una función, los cuales se utilizarán en caso de que no se especifiquen sus argumentos.
+```{r}
+Formula_notas <- function(a = 10, b=2 ,c=3) { #definimos nombre de la funcion y argumentos
+   resultado <- a * b + c #cuerpo
+    return(resultado) # intercambiable por print()
+}
+
+Formula_notas()
+
+```
+
+## If
+
+Esta función refiere a la condición si. Nuevamente, vemos entre parentesis se encuentra la condición a evaluar, y entre las llaves los criterios de ejecución. 
+
+Imagen
+
+En el ejemplo observamos que, si x es menor a 2 devuelve este resultado y, sino, indica lo contrario. Es decir, si la condición es verdadera devuelve el primer valor ("menor"), y sino, devuelve el segundo ("mayor"). Es recomendable cuidar la indexación a la hora de elaborar una función, a fin de dennotar su estructura jerárquica. 
+```{r}
+x <- 3
+
+if (x < 2) {
+  "Menor"
+  "Mayor"
+}
+
+```
+## If else
+
+El __ifelse__ tiene una estructura similar a la del if, con la excepción de que permite incorporar los criterios de ejecución para la segunda condición, en caso de que la primera sea falsa. En el ejemplo observamos que, dado que x > 2, se le suma 10. 
+
+```{r}
+x <- 4
+
+if (x < 2) {
+  x+2
+} else {
+  x+10
+}
+
+#Otra opción
+
+if (x %% 2 == 0){
+  print("Par")
+} else {
+  print("Impar")
+}
+  
+```
+
+## If else anidados
+
+Se incorpora una nueva condición a chequear, en caso de que la primera condición no lo sea. Tengamos en cuenta que no hay limitación en las funciones, se pueden anidar tantas como uno quisiera.
+
+```{r}
+x <-  2
+
+if (x < 2) {
+  "Es menor"
+  #Si no es menor, veamos si no es igual
+} else if ( x == 2) {
+  "Es igual"
+  #Y Si tampoco lo es..
+} else {
+  "Es mayor"
+}
+
+```
+También podría decirse lo mismo, en una única línea de código.
+Ejemplo para __if()__
+```{r}
+x <- 10
+Resultado <- if(x < 2) print ("Es menor") else print ("Es igual o mayor")
+
+```
+Ejemplo para __elseif()__
+```{r}
+ID <- c(0, 1, 1, 0, 1)
+
+num <- ifelse(ID == 0, "Masculino", "Femenino")
+
+num
+```
+
+## For loops
+
+Esta función permite que, por cada elemento que exista en el iterable, se realice la ejecución. En esta función es más evidente porque el x es bien llamado _índice_. 
+
+Imane
+
+Veamos un ejemplo. Si x es menor a 5, se imprime el valor. De lo contrario, no se imprime. 
+
+```{r}
+habitacion <- c(11,2,3)
+
+
+for (x in habitacion) {
+  if (x < 5)
+  print(x)
+}
+
+
+
+```
+
+## While loops
+
+Mientras que el if chequeaba si la condición era verdadera, el while chequea la condición mientras sea verdadera. Aquí también utilizamos el _Break ()_. Cuando el argumento es igual a la condición señalada, se detiene la función. 
+
+_Importante!_ Hay que asegurarse de indicar alguna condición falsa o indicar un break, de lo contrario el while se ejecutará mientras la función sea verdadera (siempre).
+```{r}
+
+x <- 10
+
+while (x) {
+  print(x)
+  x <- x - 1
+  if (x == 3)
+    break
+}
+
+```
+## Next ()
+
+También está la opción _next_ que saltea la condición. En el ejemplo vemos que, si en el vector hay un 2, la función no debe imprimir el valor. 
+```{r}
+
+habitacion <- c(11,2,3)
+
+for (x in habitacion) {
+  if (x == 2)
+    next
+  print(x)
+}
+
+```
+En el siguiente ejemplo se aplica el _next()_ en el while. Es importante mencionar que muchas veces se utiliza la división del módulo 2 y el != a 0, en tanto permite tomar sólo los valores pares.
+```{r}
+x <- 10
+
+while (x) {
+  x <- x - 1
+  if (x %%  2 != 0)
+    next
+    print(x)
+}
+```
+

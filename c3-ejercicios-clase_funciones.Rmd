@@ -1,0 +1,452 @@
+---
+title: "Clase 3 Práctica (resueltos)"
+subtitle: "Funciones y estructuras de control"
+author: "Social Data Analytics - EANT"
+output: 
+  html_document:
+    fig_height: 8
+    fig_width: 12
+    #code_folding: "hide"
+    toc: true
+    toc_float:
+      toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: paper
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Funciones
+
+En las clases anteriores hemos visto cómo aplicar funciones, tanto algunas que vienen de R base, como otras que provienen de diferentes librerías/paquetes. R también nos permite crear nuestras propias funciones, que si las guardamos como scripts luego las podemos reutilizar fácilmente en próximos proyectos. Por esto es altamente recomendable modularizarlos, para facilitar la reutilización de las mismas.
+
+Las funciones en R tienen 4 componentes principales:
+
+* Nombre de la función: Es el nombre con el que se guarda el objeto que contiene esa función, y cómo la vamos a llamar para ejecutarla.
+
+* Argumentos: Son los valores que se le van a pasar a la función al momento de ejecutarla.
+
+* Cuerpo de la función: Son las sentencias que aplica la función, define lo que la función realiza.
+
+* Valor de retorno: Es la última expresión en la función en ser evaluada, es decir el valor que la misma devuelve.
+
+1. Vamos a primer ver un ejemplo para ver los componentes de las funciones
+
+```{r}
+funcion_ej <- function(arg_a, arg_b , arg_c) { #definimos nombre de la funcion y argumentos
+   result <- arg_a * arg_b + arg_c #cuerpo
+    return(result) # intercambiable por print()
+}
+
+# Puedo ejecutar la función pasando valores, y van a respetar el orden de los argumentos
+funcion_ej(1,3,5)
+
+# Pero también puedo imputar el valor del argumento haciéndolo explícito, sin importar el orden
+funcion_ej(arg_c=100, arg_a = 1, arg_b = 1)
+```
+
+2. Puedo setear valores por default en la función 
+
+```{r}
+funcion_ej <- function(arg_a = 4, arg_b = 2 , arg_c = 3) {
+   result <- arg_a * arg_b + arg_c 
+    print(result)
+}
+
+#No necesito pasar argumentos específicos y va a tomar los default
+funcion_ej()
+
+#Aunque tenga valores definidos, si se los defino, pisa los default
+funcion_ej(1,1,1)
+```
+
+3. También puedo generar funciones que no tengan ningún argumento
+
+```{r}
+funcion_ej <- function() {
+   result <- 3 * 5 + 2 
+    print(result)
+}
+
+funcion_ej()
+```
+
+
+# If
+
+Este tipo de operaciones son comunes en la mayor parte de los lenguajes de programación, y nos pueden servir para tomar decisiones y para nuestro trabajo con datos en general.
+
+Básicamente implica pasar una expresión a testear, y si se cumple (su valor da ```TRUE```), se ejecuta un comando (o "statement"). Si en cambio es ```FALSE```, no sucede nada.
+
+4. Generamos un if que evalúe si un número es positivo
+
+```{r}
+x <- 5
+
+if(x > 0){ #esta es la expresión a testear
+print("Número positivo")
+}
+```
+
+# If..else
+
+Al agregar la claúsula ```else```, si nuestra expresión a testear devuelve ```FALSE``` (y por lo tanto no se ejecuta la operación que indicaba ```ìf```), se va a ejecutar el comando que indique ```else``` a diferencia del punto anterior que no pasaba nada.
+
+5. Sumamos una claúsula else a nuestra claúsula if
+
+```{r}
+x <- -5
+if(x > 0){
+print("Número positivo")
+} else {
+print("Número no-positivo")
+}
+```
+
+Puedo generar más de un else, que se va a ir ejecutando en "cascada" si la sentencia continúa siendo ```FALSE```
+
+6. A mí if-else anterior, agrego la condición de si el valor da 0
+
+```{r}
+x <- 0
+if(x > 0) {
+print("Número positivo")
+} else if (x < 0) {
+print("Número no-positivo")
+} else {
+print("Cero")
+}
+```
+
+# ifelse()
+
+Esta función nos permite realizar nuestros if..else en una sola sentencia-oración, "vectorizando" la misma. En vez de escribir una línea de código para cada comparación, hacemos una sola llamada que se aplicará a todos los elementos de un vector.
+
+```ifelse()``` toma 3 parámetros: la condición a comparar, el valor que toma si la condición da ```TRUE``` y el valor que toma si la condición da ```FALSE```.
+
+Su estructura es:
+
+ifelse(condicion_vector, valor_si_TRUE, valor_si_FALSE)
+
+7. Aplicamos ```ifelse()``` para cambiar una variable (expresada en un vector) codificada con 0 y 1 a una variable codificada con categorías.
+
+```{r}
+# Generamos un vector que simula una columna con valores binarios
+num <- c(0, 1, 0, 0, 0, 1, 1)
+
+num <- ifelse(num == 0, "Masculino", "Femenino")
+
+num
+```
+
+Podemos combinar nuestras funciones con las claúsulas ifelse para obtener funcionalidades más potentes. dplyr tiene su propia función que reemplaza ```ifelse()``` denominada ```if_else()```. Las diferencias son más detalle, ya que pide condiciones más estrictas para ejecutar las sentencias, y esto hace que corra más rápido. Son detalles de implementación que sólo nos interesa si nuestro proyecto tiene alta complejidad o requerimos optimizarlo al máximo.
+
+También recordemos la función ```case_when()```, que no es otra cosa que ifelse ya que lo puede reproducir, pero requiere una condición para cada valor de retorno, pero muchas veces son intercambiables, depende la situación nos puede quedar más cómoda una que otra. 
+
+8. Veamos un ejemplo de combinar una función para obtener un promedio de calificaciones y que nos devuelva si la/el estudiante aprobó.
+
+```{r}
+
+promedio_cursada <- function(calificaciones) { #Indico el nombre de la función y paso un sólo parámetro, las calificaciones, que van a ser un vector numérico
+  media <- mean(calificaciones) #calculo la media de las calificaciones
+  texto <- paste0("Calificación: ", media, ", ") # me genero una concatenación de strings donde voy a pegar la calificación
+  
+  if(media >= 6) {
+    print(paste0(texto, "aprobado"))
+  } else {
+    print(paste0(texto, "reprobado")) #evalúo si la media de calificaciones calculada más arriba es mayor a 6, si da TRUE imprime la string que ya teníamos armada indicando que está aprobado, y reprobado si la media es menor a 6
+  }
+}
+
+promedio_cursada(c(4, 6, 9, 6))
+
+promedio_cursada(c(2, 3, 8, 4, 5))
+```
+
+# Invocar funciones
+
+Una vez que creo una función, como por ejemplo ```promedio_cursada```, puedo guardarla en un script y luego llamarla/ejecutarla desde otros scripts. Esto se utiliza mucho para implementar proyectos en producción.
+
+9. Guardar la función ````promedio_cursada``` en un R Script y guardarlo en la misma carpeta que la clase, y luego convocarlo con source.
+
+```{r}
+#limpio las variables del environment para levantar de nuevo la función
+rm(list= ls())
+source('C:/Users/fponcio/Documents/EANT/promedio_cursada.R', encoding = 'utf-8')
+
+```
+
+# For loops
+
+La estructura ```for``` nos permite ejecutar un loop realizando una operación para cada elemento del vector o del conjunto de datos.
+
+La sintaxis es la siguiente:
+
+for(valor in secuencia) {
+  operacion
+}
+
+Para cada ítem de la secuencia, se le va a aplicar el cuerpo del for loop hasta que sea el último ítem de la secuencia.
+
+10. Generar un for que para cada cara del dado le aplique el cuadrado
+```{r}
+for(cara in 1:6) {
+  cara ^ 2 
+}
+
+#Vemos que el for loop no imprime nada si no se indica con una función, como por ejemplo:
+
+for(cara in 1:6) {
+  print(cara ^ 2) 
+}
+```
+
+Podemos vectorizar este for loop para cargarlo a un vector que tenga un índice Este tipo de operación es muy común para el trabajo de transformar y manipular datos y nos puede llegar a resultar muy útil.
+
+11. Probamos cargar nuestro resultado a un vector
+
+```{r}
+#tengo que crear un vector vacío primero
+mi_vector <- NULL
+
+for(cara in 1:6) {
+  mi_vector[cara] <- cara ^ 2
+}
+
+mi_vector
+
+# Ejemplo de cómo encadenar for loops
+
+for (n in 1:3){
+  print(n)
+  for(i in c("Amarillo", "Verde", "Rojo")) {
+  print(i)
+}
+}
+
+#Aunque hay muchas funciones de R que pueden hacer estas operaciones básicas, pero encandenar for loops nos puede servir para operaciones más complejas. 
+rep(c("Amarillo", "Verde", "Rojo"), 3)
+```
+
+Generalmente, hay opciones mejores opciones - más simples o más rápidas - que un for loop en R, pero muchas veces nos pueden salvar de un apuro. Sobre todo, por la particularidad de que podemos encadenar varios for loops, generando iteraciones en cascada.
+
+12. Vamos a generar un dataframe que tenga 4 columnas que sean una muestra random del 1 al 10 para cada una de las notas de cada alumno. Luego genero un vector con las notas de cada alumno y las evalúo con mi función ```promedio_cursada()```, guardando el resultado en una nueva variable.
+
+```{r}
+id_alumno <- 1:100
+nota1 <- NULL
+nota2 <- NULL
+nota3 <- NULL
+nota4 <- NULL
+
+for (i in 1:100){
+  nota1[i] <- sample(1:10, size = 1)
+  nota2[i] <- sample(1:10, size = 1)
+  nota3[i] <- sample(1:10, size = 1)
+  nota4[i] <- sample(1:10, size = 1)
+}
+
+alumnos_nota <- data.frame(id_alumno, nota1, nota2, nota3, nota4)
+
+for (i in 1:nrow(alumnos_nota)){
+  
+  notas <- c(alumnos_nota$nota1[i],alumnos_nota$nota2[i], alumnos_nota$nota3[i], alumnos_nota$nota4[i])
+  
+  alumnos_nota$resultado[i] <- promedio_cursada(notas)
+}
+
+head(alumnos_nota)
+```
+
+# While
+
+While es un tipo de loop que se va a ejecutar mientras la condición resulte ````TRUE```. Es bueno ejecutarlo cuando tenemos un loop que queremos que corra hasta que se cumpla una condición, pero no sabemos cuándo sucederá.
+
+13. Vamos a definir tres valores: inicializamos una variable con nombre *valor*, otra con nombre *conteo* y otra llamada *umbral* con un valor fijo seteado en 50. Este loop va a ir sumando un número del 1 al 10 al objeto valor hasta que éste supere a umbral, es decir el valor 50.
+
+```{r}
+umbral <- 50
+valor <- 0
+conteo <- 0
+
+while(valor < umbral) { #el loop se va a ejecutar hasta que valor sea igual o mayor a umbral
+  valor <- valor + sample(x = 1:10, size = 1) #acá voy asignando a "valor" su valor actual y sumando una muestra
+  conteo <- conteo + 1 #mientras realizo un conteo de las iteraciones
+}
+
+valor
+
+conteo
+```
+
+14. En el caso anterior, si no pisara el objeto *valor*, el loop no cortaría nunca, y lo tengo que interrumpir manualmente.
+
+```{r}
+umbral <- 50
+valor <- 0
+conteo <- 0
+
+while(valor < umbral) { 
+   valor + sample(x = 1:10, size = 1) 
+  conteo <- conteo + 1
+}
+
+valor
+conteo
+```
+
+# break()
+
+Esta función nos permite interrumpir un loop si se cumple una cierta condición.
+
+15. Vamos a ver su funcionamiento
+```{r}
+# iteramos del 1 al 10, y si el elemento toma valor a 3, se interrumpe el loop
+for(i in 1:10) {
+  if(i == 3) {
+    break
+  }
+  print(i)
+}
+
+# Otro ejemplo más gráfico
+numero <- 20
+
+while(numero > 5) {
+  if(numero == 15) {
+    break
+  }
+  numero <- numero - 1
+}
+
+numero
+```
+
+# next()
+
+Similar a ```break()```, pero en vez de romper el loop, saltea esa iteración si cumple una condición. Tanto ```break()``` como ```next``` funcionan con for loops como con while, y obviamente los podemos incluir en nuestra funciones que construyamos.
+
+```{r}
+
+for(i in 1:4) {
+  if(i == 3) {
+    next
+  }
+  print(i)
+}
+
+```
+
+Vamos ahora a probar la implementación de una función que haga Bootstrapping de nuestros datos. Lo mismo de la clase de estadística pero programándolo nosotres, y probando con la correlación en vez de la media.
+
+```{r}
+#abrimos el dataset de Gapminder
+data <- read.csv('gapminder_data.csv')
+
+#Necesitamos entonces implementar una función que:
+#(1) tome dos variables y samplee algunos casos
+#(2) a esos casos sampleados les tome la correlación
+#(3) nos devuelva esa correlación a un vector
+#(4) opcional, podemos pedirle que nos devuelva un plot o el vector de correlaciones directamente.
+####
+# Para probar alguna implementación, se puede intentar sin hacer la función al principio, sino directamente en lo que iría adentro.
+
+#Necesitamos un vector donde podamos guardar las correlaciones, y una cantidad de iteraciones fijas:
+iters <- 10
+corrs <- rep(NA,iters) #hago un vector de NAs de largo "iters"
+
+#Ahora pruebo el For que va a hacer el sampleo varias veces
+for (i in 1:iters){
+  K <- length(data$CO2)
+  indices <- sample(1:K, size=20, replace=T)
+  Xs <- data$CO2[indices] 
+  Ys <- data$life_exp[indices] 
+  correlacion <- cor(Xs, Ys)
+  corrs[i]<- correlacion
+}
+
+
+#Una vez que está lo ponemos en una función. Tenemos que pensar qué argumentos queremos que tenga:
+
+Boots <- function(iters){
+  corrs <- rep(NA,iters)
+  for (i in 1:iters){
+    K <- length(data$CO2)
+    indices <- sample(1:K, size=20, replace=T)
+    Xs <- data$CO2[indices] 
+    Ys <- data$life_exp[indices] 
+    correlacion <- cor(Xs, Ys)
+    corrs[i]<- correlacion
+  }
+  return(corrs)
+}
+
+```
+
+
+Podemos hacer una función más general, pasándole directamente un dataframe y las columnas.
+```{r}
+Boots <- function(iters, df, X, Y){
+  corrs <- rep(NA,iters)
+  for (i in 1:iters){
+    K <- length(df[,X])
+    indices <- sample(1:K, size=20, replace=T)
+    Xs <- df[indices,X] 
+    Ys <- df[indices,Y] 
+    correlacion <- cor(Xs, Ys)
+    corrs[i]<- correlacion
+  }
+  return(corrs)
+}
+
+Boots(10, data, "CO2", "life_exp")
+
+```
+
+También puedo usar funciones para preprocesar los datos y ahorrar trabajo y ayudar a organizar el trabajo:
+```{r}
+#Creemos por ejemplo una función que tome un dataframe y, por ejemplo, centre los valores y remueva los NAs, y devuelva el dataframe limpio:
+library(tidyverse) #para usar el drop_na
+
+limpieza <- function(df){
+  df <- df %>% drop_na() #le remuevo las filas con NAs
+  for (col in colnames(df)){ #para cada una de las columnas
+    if(is.double(df[,col]) || is.integer(df[,col])){ #chequeo si es entero o decimal, y si lo es, prosigo
+      df[,col] <- (df[,col]-mean(df[,col]))/sd(df[,col]) #estandarizo
+    }
+  }
+  return(df)
+}
+
+DFT <- limpieza(data)
+```
+
+# Yapa
+
+```{r}
+#instalamos el paquete "devtools", que nos sirve para instalar paquetes que están en github pero no en CRAN (es decir validados y subidos por R oficialmente)
+#install.packages("devtools")
+#install.packages("usethis")
+library(devtools)
+devtools::install_github("DillonHammill/DataEditR")
+library(DataEditR)
+# Documentación: https://dillonhammill.github.io/DataEditR/articles/DataEditR.html
+data_edit(mtcars)
+mtcars
+```
+
+# Bibliografía
+
+- https://bookdown.org/jboscomendoza/r-principiantes4/
+- https://www.datamentor.io/r-programming
+- https://www.tutorialspoint.com/r/index.htm
+
+
+
+
+
